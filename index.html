@@ -26,9 +26,11 @@
       </select>
     </div>
 
+    <!-- Wallet -->
     <button id="connectWalletBtn">Connect Wallet</button>
     <p id="walletBalance">Balance: 0</p>
 
+    <!-- Trade Panel -->
     <div class="trade-panel">
       <h2>Trade Panel</h2>
       <button class="tradeBtn" data-action="buy">Buy</button>
@@ -37,12 +39,14 @@
       <p id="tradeStatus">No trades yet.</p>
     </div>
 
+    <!-- Token Search -->
     <div class="token-search">
       <input type="text" id="searchToken" placeholder="Search token symbol or name">
       <button id="searchBtn">Search</button>
       <div id="searchResults"></div>
     </div>
 
+    <!-- Chat Panel -->
     <div class="chat-panel">
       <h2>Chat / Suggestions</h2>
       <input type="text" id="chatInput" placeholder="Type your message">
@@ -50,15 +54,15 @@
       <div id="chatMessages"></div>
     </div>
 
+    <!-- Mode Switch -->
     <div class="mode-switch">
       <button id="mockBtn">Mock Mode</button>
       <button id="hybridBtn">Hybrid Testnet Mode</button>
     </div>
   </div>
 
-  <!-- Load configuration and main app scripts -->
-<script src="config.js"></script>
-<script src="app.js"></script>
+  <!-- Scripts -->
+  <script src="config.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>
-      
