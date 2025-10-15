@@ -1,4 +1,4 @@
-// Owner wallet address
+// Owner wallet address (for reference/mock)
 const OWNER_WALLET = "0xD18EaDE49094fF568Aed13372436d67E30340130";
 
 // Fee percentage
@@ -79,3 +79,5 @@ const UI_TEXT = {
         noTrades: "まだ取引はありません。", tokenSearch: "トークンのシンボルまたは名前を検索", search: "検索",
         chatPanel: "チャット / 提案", send: "送信", mockMode: "モックモード", hybridMode: "ハイブリッドテストネットモード" }
 };
+  
+  

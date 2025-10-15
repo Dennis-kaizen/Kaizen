@@ -1,101 +1,126 @@
-// ----- Config -----
+// ---------------- CONFIG ----------------
 let CURRENT_MODE = "mock";
 let currentLanguage = "en";
+let userWalletAddress = null;
 let userWalletBalance = 0;
-let selectedAction = null;
+let selectedToken = "ETH";
 
-// ----- DOM Elements -----
-const connectWalletBtn = document.getElementById("connectWalletBtn");
-const walletBalance = document.getElementById("walletBalance");
-const tradeButtons = document.querySelectorAll(".tradeBtn");
-const confirmTradeBtn = document.getElementById("confirmTradeBtn");
-const tradeStatus = document.getElementById("tradeStatus");
-const searchTokenInput = document.getElementById("searchToken");
-const searchBtn = document.getElementById("searchBtn");
-const searchResults = document.getElementById("searchResults");
-const chatInput = document.getElementById("chatInput");
-const sendChatBtn = document.getElementById("sendChatBtn");
-const chatMessages = document.getElementById("chatMessages");
-const languageSelect = document.getElementById("languageSelect");
-const mockBtn = document.getElementById("mockBtn");
-const hybridBtn = document.getElementById("hybridBtn");
+// ---------------- UI SETUP ----------------
+function $(id) {
+  return document.getElementById(id);
+}
 
-// ----- Events -----
-// Connect wallet
-connectWalletBtn.addEventListener("click", () => {
-  userWalletBalance = 10;
-  walletBalance.innerText = `Balance: ${userWalletBalance} ETH`;
-  alert("Wallet connected (mock)");
-});
+function showMessage(msg) {
+  $("tradeStatus").innerText = msg;
+  console.log(msg);
+}
 
-// Trade selection
-tradeButtons.forEach(btn => {
-  btn.addEventListener("click", () => {
-    selectedAction = btn.dataset.action;
-    tradeStatus.innerText = `Selected action: ${selectedAction}`;
+// ---------------- LANGUAGE HANDLER ----------------
+function updateUITexts() {
+  const t = UI_TEXT[currentLanguage];
+
+  $("connectWalletBtn").innerText = t.connectWallet;
+  $("walletBalance").innerText = `${t.balance}: ${userWalletBalance} ETH`;
+  document.querySelector(".trade-panel h2").innerText = t.tradePanel;
+
+  document.querySelectorAll(".tradeBtn").forEach(btn => {
+    btn.innerText = btn.dataset.action === "buy" ? t.buy : t.sell;
   });
-});
 
-// Confirm trade
-confirmTradeBtn.addEventListener("click", () => {
-  if (!selectedAction) return alert("Select Buy or Sell first!");
-  tradeStatus.innerText = `Trade confirmed: ${selectedAction}`;
-  selectedAction = null;
-});
+  $("confirmTradeBtn").innerText = t.confirmTrade;
+  $("tradeStatus").innerText = t.noTrades;
+  document.querySelector(".token-search input").placeholder = t.tokenSearch;
+  $("searchBtn").innerText = t.search;
+  document.querySelector(".chat-panel h2").innerText = t.chatPanel;
+  $("sendChatBtn").innerText = t.send;
+  $("mockBtn").innerText = t.mockMode;
+  $("hybridBtn").innerText = t.hybridMode;
+  document.querySelector("h1").innerText = t.dashboard;
+}
 
-// Token search
-searchBtn.addEventListener("click", () => {
-  const query = searchTokenInput.value.trim().toUpperCase();
-  if (!query) return;
-  const results = TOKEN_LIST.filter(t => t.symbol.includes(query) || t.name.toUpperCase().includes(query));
-  searchResults.innerHTML = results.length
-    ? results.map(t => `<p>${t.symbol} - ${t.name}</p>`).join("")
-    : "<p>No tokens found.</p>";
-});
-
-// Chat
-sendChatBtn.addEventListener("click", () => {
-  const msg = chatInput.value.trim();
-  if (!msg) return;
-  chatMessages.innerHTML += `<p><strong>You:</strong> ${msg}</p>`;
-  chatMessages.innerHTML += `<p><strong>Kaizen:</strong> (mock) Got it!</p>`;
-  chatInput.value = "";
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-});
-
-// Language switch
-languageSelect.addEventListener("change", () => {
-  currentLanguage = languageSelect.value;
+$("languageSelect").addEventListener("change", e => {
+  currentLanguage = e.target.value;
   updateUITexts();
 });
 
-// Mode buttons
-mockBtn.addEventListener("click", () => {
-  CURRENT_MODE = "mock";
-  alert("Switched to Mock Mode");
-});
-hybridBtn.addEventListener("click", () => {
-  CURRENT_MODE = "hybrid";
-  alert("Switched to Hybrid Testnet Mode");
-});
-
-// ----- UI Update -----
-function updateUITexts() {
-  const texts = UI_TEXT[currentLanguage];
-  document.querySelector("h1").innerText = texts.dashboard;
-  connectWalletBtn.innerText = texts.connectWallet;
-  walletBalance.innerText = `${texts.balance}: ${userWalletBalance} ETH`;
-  document.querySelector(".trade-panel h2").innerText = texts.tradePanel;
-  tradeButtons.forEach(btn => btn.innerText = btn.dataset.action === "buy" ? texts.buy : texts.sell);
-  confirmTradeBtn.innerText = texts.confirmTrade;
-  tradeStatus.innerText = texts.noTrades;
-  searchTokenInput.placeholder = texts.tokenSearch;
-  searchBtn.innerText = texts.search;
-  document.querySelector(".chat-panel h2").innerText = texts.chatPanel;
-  sendChatBtn.innerText = texts.send;
-  mockBtn.innerText = texts.mockMode;
-  hybridBtn.innerText = texts.hybridMode;
+// ---------------- WALLET CONNECTION ----------------
+async function connectWallet() {
+  if (window.ethereum) {
+    try {
+      const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+      userWalletAddress = accounts[0];
+      CURRENT_MODE = "hybrid";
+      $("walletBalance").innerText = `Wallet: ${userWalletAddress.slice(0, 6)}...${userWalletAddress.slice(-4)}`;
+      showMessage("✅ Connected to MetaMask successfully!");
+    } catch (error) {
+      showMessage("❌ Wallet connection rejected.");
+    }
+  } else {
+    showMessage("⚠️ MetaMask not detected — using mock mode.");
+    CURRENT_MODE = "mock";
+  }
 }
 
-// Initialize UI
-updateUITexts();
+$("connectWalletBtn").addEventListener("click", connectWallet);
+
+// ---------------- TRADE LOGIC ----------------
+function performTrade(action) {
+  if (CURRENT_MODE === "hybrid" && userWalletAddress) {
+    showMessage(`🔹 ${action.toUpperCase()} order sent to testnet for ${selectedToken}!`);
+  } else if (CURRENT_MODE === "mock") {
+    showMessage(`🧩 ${action.toUpperCase()} mock trade executed for ${selectedToken}.`);
+  } else {
+    showMessage("⚠️ Connect wallet or enable hybrid mode first!");
+  }
+}
+
+document.querySelectorAll(".tradeBtn").forEach(btn => {
+  btn.addEventListener("click", () => performTrade(btn.dataset.action));
+});
+
+$("confirmTradeBtn").addEventListener("click", () => {
+  showMessage("✅ Trade confirmed!");
+});
+
+// ---------------- MODE SWITCH ----------------
+$("mockBtn").addEventListener("click", () => {
+  CURRENT_MODE = "mock";
+  showMessage("🧩 Mock mode activated.");
+});
+
+$("hybridBtn").addEventListener("click", () => {
+  if (window.ethereum) {
+    CURRENT_MODE = "hybrid";
+    showMessage("🔗 Hybrid Testnet mode activated.");
+  } else {
+    showMessage("⚠️ MetaMask not found. Still in mock mode.");
+  }
+});
+
+// ---------------- TOKEN SEARCH ----------------
+$("searchBtn").addEventListener("click", () => {
+  const query = $("searchToken").value.toLowerCase();
+  const results = TOKEN_LIST.filter(t =>
+    t.symbol.toLowerCase().includes(query) || t.name.toLowerCase().includes(query)
+  );
+
+  const resultHTML = results.length
+    ? results.map(t => `<div>${t.symbol} - ${t.name}</div>`).join("")
+    : "<div>No token found</div>";
+
+  $("searchResults").innerHTML = resultHTML;
+});
+
+// ---------------- CHAT PANEL ----------------
+$("sendChatBtn").addEventListener("click", () => {
+  const msg = $("chatInput").value.trim();
+  if (!msg) return;
+  $("chatMessages").innerHTML += `<div><b>You:</b> ${msg}</div>`;
+  $("chatInput").value = "";
+  setTimeout(() => {
+    $("chatMessages").innerHTML += `<div><b>Kaizen:</b> I'm still learning! Try a command or search a token.</div>`;
+  }, 500);
+});
+
+// ---------------- INIT ----------------
+window.addEventListener("load", updateUITexts);
