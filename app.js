@@ -44,7 +44,8 @@ $("languageSelect").addEventListener("change", e => {
 });
 
 // ---------------- WALLET CONNECTION ----------------
-async function connectWallet() {
+$("connectWalletBtn").addEventListener("click", async () => {
+  alert("Attempting wallet connection...");
   if (window.ethereum) {
     try {
       const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
@@ -52,16 +53,17 @@ async function connectWallet() {
       CURRENT_MODE = "hybrid";
       $("walletBalance").innerText = `Wallet: ${userWalletAddress.slice(0, 6)}...${userWalletAddress.slice(-4)}`;
       showMessage("✅ Connected to MetaMask successfully!");
+      alert("Wallet connected successfully!");
     } catch (error) {
       showMessage("❌ Wallet connection rejected.");
+      alert("Wallet connection rejected.");
     }
   } else {
     showMessage("⚠️ MetaMask not detected — using mock mode.");
+    alert("MetaMask not detected — switched to mock mode!");
     CURRENT_MODE = "mock";
   }
-}
-
-$("connectWalletBtn").addEventListener("click", connectWallet);
+});
 
 // ---------------- TRADE LOGIC ----------------
 function performTrade(action) {
@@ -117,8 +119,11 @@ $("sendChatBtn").addEventListener("click", () => {
   if (!msg) return;
   $("chatMessages").innerHTML += `<div><b>You:</b> ${msg}</div>`;
   $("chatInput").value = "";
+  $("chatMessages").scrollTop = $("chatMessages").scrollHeight;
+
   setTimeout(() => {
     $("chatMessages").innerHTML += `<div><b>Kaizen:</b> I'm still learning! Try a command or search a token.</div>`;
+    $("chatMessages").scrollTop = $("chatMessages").scrollHeight;
   }, 500);
 });
 
