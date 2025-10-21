@@ -1,5 +1,5 @@
 // ---------- BACKEND CONNECTION ----------
-const BACKEND_URL = "http://127.0.0.1:5000";
+const BACKEND_URL = "https://kaizen-backend-4xv3.onrender.com";
 
 async function sendToBackend(endpoint, data = {}) {
   try {
