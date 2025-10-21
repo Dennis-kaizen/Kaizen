@@ -1,3 +1,20 @@
+// ---------- BACKEND CONNECTION ----------
+const BACKEND_URL = "http://127.0.0.1:5000";
+
+async function sendToBackend(endpoint, data = {}) {
+  try {
+    const res = await fetch(`${BACKEND_URL}/${endpoint}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+    const json = await res.json();
+    showMessage(`🧠 Backend: ${json.message || "Response received"}`);
+  } catch (err) {
+    console.error("Backend Error:", err);
+    showMessage("❌ Failed to reach backend.");
+  }
+}
 // ---------------- CONFIG ----------------
 let CURRENT_MODE = "mock";
 let currentLanguage = "en";
@@ -69,20 +86,13 @@ $("connectWalletBtn").addEventListener("click", async () => {
 function performTrade(action) {
   if (CURRENT_MODE === "hybrid" && userWalletAddress) {
     showMessage(`🔹 ${action.toUpperCase()} order sent to testnet for ${selectedToken}!`);
+    sendToBackend("trade", { action, token: selectedToken, wallet: userWalletAddress });
   } else if (CURRENT_MODE === "mock") {
     showMessage(`🧩 ${action.toUpperCase()} mock trade executed for ${selectedToken}.`);
   } else {
     showMessage("⚠️ Connect wallet or enable hybrid mode first!");
   }
 }
-
-document.querySelectorAll(".tradeBtn").forEach(btn => {
-  btn.addEventListener("click", () => performTrade(btn.dataset.action));
-});
-
-$("confirmTradeBtn").addEventListener("click", () => {
-  showMessage("✅ Trade confirmed!");
-});
 
 // ---------------- MODE SWITCH ----------------
 $("mockBtn").addEventListener("click", () => {
